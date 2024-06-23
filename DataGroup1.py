@@ -21,22 +21,28 @@ selected_category = st.selectbox("Select a Category", list(categories.keys()))
 selected_subcategories = st.multiselect("Select Sub-categories", categories[selected_category])
 
 # Filter the dataframe based on the selected category and sub-categories
-filtered_df = df[(df['Category'] == selected_category) & (df['Sub_Category'].isin(selected_subcategories))]
+if selected_category == 'All':
+    filtered_df = df
+elif selected_subcategories:
+    filtered_df = df[(df['Category'] == selected_category) & (df['Sub_Category'].isin(selected_subcategories))]
+else:
+    filtered_df = df[df['Category'] == selected_category]
 
 # Display the filtered data
 st.write(f"### Data for {selected_category} - {', '.join(selected_subcategories)}")
 st.dataframe(filtered_df)
 
-# Plot a line chart of sales for the selected items
+# Aggregate sales by year
 if not filtered_df.empty:
+    filtered_df['Year'] = filtered_df['Order_Date'].dt.year
+    sales_by_year = filtered_df.groupby('Year')['Sales'].sum()
+
+    # Plot a line chart of cumulative sales over the years
     fig, ax = plt.subplots(figsize=(10, 6))
-    for sub_category in selected_subcategories:
-        sub_df = filtered_df[filtered_df['Sub_Category'] == sub_category]
-        ax.plot(sub_df['Order_Date'], sub_df['Sales'], marker='o', linestyle='-', label=sub_category)
-    ax.set_xlabel('Order Date')
-    ax.set_ylabel('Sales')
-    ax.set_title('Sales Trend')
-    ax.legend()
+    ax.plot(sales_by_year.index, sales_by_year.values, marker='o', linestyle='-', color='b')
+    ax.set_xlabel('Year')
+    ax.set_ylabel('Total Sales')
+    ax.set_title(f'Total Sales Over the Years - {selected_category}')
     st.pyplot(fig)
 else:
     st.write("No data available for the selected category and sub-categories.")
