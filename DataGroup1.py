@@ -3,14 +3,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Set the title of the Streamlit app
-st.title("This is the Data App Assignment, on June 20th")
+st.title("Sales Analysis App")
 
 # Display a header and read in the CSV file
 st.write("### Input Data and Examples")
-df = pd.read_csv("Superstore_Sales_utf8.csv", parse_dates=True)
-st.dataframe(df)
+df = pd.read_csv("Superstore_Sales_utf8.csv", parse_dates=['Order_Date'])
 
-# Define sub-categories for each category
+# Define categories and sub-categories
 categories = {
     'Furniture': ['Bookcases', 'Chairs', 'Furnishings', 'Tables'],
     'Office Supplies': ['Appliances', 'Art', 'Binders', 'Envelopes', 'Fasteners', 'Labels', 'Paper', 'Storage', 'Supplies'],
@@ -28,27 +27,18 @@ filtered_df = df[(df['Category'] == selected_category) & (df['Sub_Category'].isi
 st.write(f"### Data for {selected_category} - {', '.join(selected_subcategories)}")
 st.dataframe(filtered_df)
 
-# Plot a bar chart of sales by sub-category within the selected category and sub-categories
-st.bar_chart(filtered_df, x="Sub_Category", y="Sales")
-
-# Aggregate sales by sub-category and display as a dataframe
-aggregated_df = filtered_df.groupby("Sub_Category").sum().reset_index()
-st.dataframe(aggregated_df)
-
-# Plot a bar chart with aggregated sales by sub-category
-st.bar_chart(aggregated_df, x="Sub_Category", y="Sales", color="#04f")
-
-# Ensure the Order_Date column is in datetime format and set it as the index
-filtered_df["Order_Date"] = pd.to_datetime(filtered_df["Order_Date"])
-filtered_df.set_index('Order_Date', inplace=True)
-
-# Group sales by month
-sales_by_month = filtered_df.filter(items=['Sales']).groupby(pd.Grouper(freq='M')).sum()
-
-# Display the monthly sales data
-st.dataframe(sales_by_month)
-
-# Plot a line chart of monthly sales
-st.line_chart(sales_by_month, y="Sales")
+# Plot a line chart of sales for the selected items
+if not filtered_df.empty:
+    fig, ax = plt.subplots(figsize=(10, 6))
+    for sub_category in selected_subcategories:
+        sub_df = filtered_df[filtered_df['Sub_Category'] == sub_category]
+        ax.plot(sub_df['Order_Date'], sub_df['Sales'], marker='o', linestyle='-', label=sub_category)
+    ax.set_xlabel('Order Date')
+    ax.set_ylabel('Sales')
+    ax.set_title('Sales Trend')
+    ax.legend()
+    st.pyplot(fig)
+else:
+    st.write("No data available for the selected category and sub-categories.")
 
 
