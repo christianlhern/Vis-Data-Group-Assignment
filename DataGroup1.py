@@ -32,8 +32,18 @@ else:
 st.write(f"### Data for {selected_category} - {', '.join(selected_subcategories)}")
 st.dataframe(filtered_df)
 
-# Aggregate sales by year
+# Calculate metrics: Total Sales, Total Profit, Overall Profit Margin (%)
 if not filtered_df.empty:
+    total_sales = filtered_df['Sales'].sum()
+    total_profit = filtered_df['Profit'].sum()
+    overall_profit_margin = (total_profit / total_sales) * 100 if total_sales != 0 else 0
+
+    # Display metrics
+    st.write(f"**Total Sales:** ${total_sales:.2f}")
+    st.write(f"**Total Profit:** ${total_profit:.2f}")
+    st.write(f"**Overall Profit Margin (%):** {overall_profit_margin:.2f}%")
+
+    # Aggregate sales by year
     filtered_df['Year'] = filtered_df['Order_Date'].dt.year
     sales_by_year = filtered_df.groupby('Year')['Sales'].sum()
 
@@ -46,5 +56,3 @@ if not filtered_df.empty:
     st.pyplot(fig)
 else:
     st.write("No data available for the selected category and sub-categories.")
-
-
