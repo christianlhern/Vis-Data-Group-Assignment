@@ -41,11 +41,12 @@ if not filtered_df.empty:
     # Calculate overall average profit margin for all products
     overall_avg_profit_margin = (df['Profit'].sum() / df['Sales'].sum()) * 100 if df['Sales'].sum() != 0 else 0
 
-    # Display metrics including delta for overall profit margin
+    # Display metrics including delta for overall profit margin using st.metric
     st.write(f"**Total Sales:** ${total_sales:.2f}")
     st.write(f"**Total Profit:** ${total_profit:.2f}")
-    st.write(f"**Overall Profit Margin (%):** {overall_profit_margin:.2f}% "
-             f"[delta {overall_profit_margin - overall_avg_profit_margin:.2f}%]")
+    st.metric(label="Overall Profit Margin (%)",
+              value=f"{overall_profit_margin:.2f}%",
+              delta=f"{overall_profit_margin - overall_avg_profit_margin:.2f}%")
 
     # Aggregate sales by year
     filtered_df['Year'] = filtered_df['Order_Date'].dt.year
